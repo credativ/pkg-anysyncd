@@ -1,0 +1,7 @@
+bin/Sync
+Build.PL
+examples/sync.ini
+lib/Sync/Action/Base.pm
+lib/Sync/Action/Rsync.pm
+lib/Sync/Daemon.pm
+MANIFEST			This list of files
