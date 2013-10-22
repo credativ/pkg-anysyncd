@@ -63,6 +63,7 @@ use AnyEvent;
 use AnyEvent::Filesys::Notify;
 use Log::Log4perl;
 use Config::IniFiles;
+use Data::Dumper;
 
 my $VERSION = '0.1';
 
@@ -242,11 +243,16 @@ after start => sub {
         #build configuration for the handler
 
         my $config_for_handler;
-        foreach my $key ( $self->config->Parameters($section) ) {
-            $config_for_handler->{$key} =
-                $self->config->val( $section, $key );
+        foreach my $sect_t ( 'global', $section ) {
+            foreach my $key ( $self->config->Parameters($sect_t) ) {
+                $config_for_handler->{$key} =
+                    $self->config->val( $sect_t, $key );
+            }
+            $config_for_handler->{name} = $sect_t;
         }
-        $config_for_handler->{name} = $section;
+
+        $self->log->debug( sprintf('Configuration for section "$section": %s',
+            Dumper($config_for_handler) ));
 
         my $obj =
             $self->_load( $section, $handler, "new",
