@@ -19,7 +19,7 @@ Sync::Daemon - Daemonizing for Sync
 
 =head1 DESCRIPTION
 
-This module takes care about daemonizing the stats daemon. It uses
+This module takes care of daemonizing the Sync daemon. It uses
 L<MooseX::Daemonize> for all the dirty work.
 
 The following functions provided by L<MooseX::Daemonize> are hidden
@@ -76,7 +76,7 @@ $self->log is a L<Log::Log4perl::Logger> object
 has log =>
     ( is => 'rw', isa => 'Log::Log4perl::Logger', traits => ['NoGetopt'] );
 
-=item C<logfile> 
+=item C<logfile>
 
 $self->logfile allows to set the logfile, this can't be changed after the
 object
@@ -93,7 +93,7 @@ has logfile => (
     documentation => qq { logfile (default: /var/log/Sync.log) }
 );
 
-=item C<loglevel> 
+=item C<loglevel>
 
 $self->loglevel allows to set the loglevel, this can't be changed after the object
 is fully initialized (in that case after C<$self->log> is used for the first
@@ -109,7 +109,7 @@ has loglevel => (
     documentation => qq { log4perl compatible loglevel (default: DEBUG) }
 );
 
-=item C<configfile> 
+=item C<configfile>
 
 $self->configfile represents the configurationfile, it defaults to /etc/sync.ini
 
@@ -122,7 +122,7 @@ has configfile => (
     documentation => qq { configfile for Sync, defaults to '/etc/sync.ini' }
 );
 
-=item C<config> 
+=item C<config>
 
 $self->config the Config::IniFiles configuration object
 
@@ -176,7 +176,7 @@ sub _logging_configuration {
     log4perl.appender.Logfile = Log::Log4perl::Appender::File
     log4perl.appender.Logfile.filename = $logfile
     log4perl.appender.Logfile.layout = Log::Log4perl::Layout::PatternLayout
-    log4perl.appender.Logfile.layout.ConversionPattern = %d %p %c %m%n
+    log4perl.appender.Logfile.layout.ConversionPattern = %d %p %c[%P] %m%n
     };
     return $config;
 }
@@ -319,8 +319,7 @@ sub _load {
 
 =head1 LICENSE
 
-This is released under the FIXME
-License. See B<FIXME>.
+This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 
