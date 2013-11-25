@@ -43,9 +43,10 @@ sub BUILD {
     $self->_files->store( freeze( [] ) );
 
     if ( $self->config->{'cron'} ) {
-
         AnyEvent::DateTime::Cron->new()
-            ->add( $self->config->{'cron'} => sub { $self->process_files; } )
+            ->add( $self->config->{'cron'} => sub {
+                $self->process_files if ( !$self->_timer and $self->_is_unlocked );
+            } )
             ->start;
     }
 }
