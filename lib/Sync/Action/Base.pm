@@ -45,7 +45,7 @@ sub BUILD {
     if ( $self->config->{'cron'} ) {
         AnyEvent::DateTime::Cron->new()
             ->add( $self->config->{'cron'} => sub {
-                $self->process_files if ( !$self->_timer and $self->_is_unlocked );
+                $self->process_files('full') if ( !$self->_timer and $self->_is_unlocked );
             } )
             ->start;
     }
