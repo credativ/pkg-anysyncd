@@ -224,6 +224,11 @@ sub _dirs_equal {
     return $equal;
 }
 
+sub _report_error {
+    my ($self, $err) = @_;
+    $self->log->debug("_report_error(): NOT IMPLEMENTED, YET");
+}
+
 1;
 
 # vim: syntax=perl sw=4 ts=4 et shiftround
