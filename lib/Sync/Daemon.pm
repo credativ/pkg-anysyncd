@@ -273,6 +273,7 @@ after start => sub {
         my $notifier = AnyEvent::Filesys::Notify->new(
             dirs   => [$watcher],
             filter => sub { shift !~ /$filter/ },
+            parse_raw => 1,
             cb     => sub {
                 $self->process( $section, @_ );
             }
