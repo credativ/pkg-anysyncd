@@ -133,7 +133,7 @@ sub _commit_remote {
     for my $host ( split( '\s+', $self->config->{'remote_hosts'} ) ) {
         my $ssh = Net::OpenSSH->new($host);
 
-        my $ok = $ssh->test( "rsync -aHAXq --delete $csyncdir/ $proddir.tmp" );
+        my $ok = $ssh->test( "rsync -caHAXq --delete $csyncdir/ $proddir.tmp" );
 
         if ( $ok ) {
             $ok = $ssh->test( "diff -qrN $csyncdir $proddir.tmp" );
@@ -187,6 +187,7 @@ sub _local_rsync {
         'verbose'    => 1,
         'archive'    => 1,
         'delete'     => 1,
+        'checksum'   => 1,
         'rsync-path' => '/usr/bin/rsync'
     );
 
