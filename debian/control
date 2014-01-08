@@ -9,7 +9,16 @@ Homepage: http://github.com/formorer/AnySyncd
 
 Package: anysyncd
 Architecture: all
-Depends: ${misc:Depends}, ${perl:Depends}
+Depends: ${perl:Depends},
+    libmoose-perl,
+    libmoosex-attributehelpers-perl,
+    libanyevent-filesys-notify-perl,
+    liblog-log4perl-perl,
+    libconfig-inifiles-perl,
+    libanyevent-datetime-cron-perl, 
+    libipc-sharelite-perl,
+    libfile-rsync-perl
+Recommends: csync2
 Description: daemon to synchronize files
  anysyncd is a daemon that allows watching directories with inotify and
  keeping them update. It supports various backends for the synchronisation
