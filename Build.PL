@@ -12,8 +12,6 @@ BEGIN {
 	eval 'use Module::Build::Debian';
 }
 
-use Module::Build::Debian;
-
 my $build = Module::Build->new
 (
 	dist_name => 'Anysyncd',
