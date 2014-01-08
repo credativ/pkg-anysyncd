@@ -1,0 +1,16 @@
+Source: anysyncd
+Section: perl
+Priority: optional
+Maintainer: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
+Build-Depends: debhelper (>= 8),
+ perl
+Standards-Version: 3.9.5
+Homepage: http://github.com/formorer/AnySyncd
+
+Package: anysyncd
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends}
+Description: daemon to synchronize files
+ anysyncd is a daemon that allows watching directories with inotify and
+ keeping them update. It supports various backends for the synchronisation
+ (csync2, rsync) and can be extended with sync action perl modules.
