@@ -38,7 +38,7 @@ meta_data() {
 Resource script for anysyncd.
 Manages a anysyncd.
 </longdesc>
-<shortdesc lang="en">Manages a lsysncd instance</shortdesc>
+<shortdesc lang="en">Manages a anysyncd instance</shortdesc>
 
 <parameters>
 <parameter name="binary" unique="0" required="0">
