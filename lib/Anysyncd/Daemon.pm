@@ -1,13 +1,13 @@
-package Sync::Daemon;
+package Anysyncd::Daemon;
 
 =head1 NAME
 
-Sync::Daemon - Daemonizing for Sync
+Anysyncd::Daemon - Daemonizing for anysyncd
 
 =head1 SYNOPSIS
 
-    use Sync::Daemon;
-    my $daemon = Sync::Daemon->new_with_options();
+    use Anysyncd::Daemon;
+    my $daemon = Anysyncd::Daemon->new_with_options();
     my ($command) = @{$daemon->extra_argv};
 
     $daemon->start   if $command eq 'start';
@@ -19,7 +19,7 @@ Sync::Daemon - Daemonizing for Sync
 
 =head1 DESCRIPTION
 
-This module takes care about daemonizing the stats daemon. It uses
+This module takes care of daemonizing the anysyncd daemon. It uses
 L<MooseX::Daemonize> for all the dirty work.
 
 The following functions provided by L<MooseX::Daemonize> are hidden
@@ -76,7 +76,7 @@ $self->log is a L<Log::Log4perl::Logger> object
 has log =>
     ( is => 'rw', isa => 'Log::Log4perl::Logger', traits => ['NoGetopt'] );
 
-=item C<logfile> 
+=item C<logfile>
 
 $self->logfile allows to set the logfile, this can't be changed after the
 object
@@ -90,10 +90,10 @@ has logfile => (
     isa           => 'Str',
     builder       => '_build_logfile',
     lazy          => 1,
-    documentation => qq { logfile (default: /var/log/Sync.log) }
+    documentation => qq { logfile (default: /var/log/anysyncd.log) }
 );
 
-=item C<loglevel> 
+=item C<loglevel>
 
 $self->loglevel allows to set the loglevel, this can't be changed after the object
 is fully initialized (in that case after C<$self->log> is used for the first
@@ -109,7 +109,7 @@ has loglevel => (
     documentation => qq { log4perl compatible loglevel (default: DEBUG) }
 );
 
-=item C<configfile> 
+=item C<configfile>
 
 $self->configfile represents the configurationfile, it defaults to /etc/sync.ini
 
@@ -118,11 +118,11 @@ $self->configfile represents the configurationfile, it defaults to /etc/sync.ini
 has configfile => (
     is            => 'rw',
     isa           => 'Str',
-    default       => '/etc/sync.ini',
-    documentation => qq { configfile for Sync, defaults to '/etc/sync.ini' }
+    default       => '/etc/anysyncd/anysyncd.ini',
+    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
 );
 
-=item C<config> 
+=item C<config>
 
 $self->config the Config::IniFiles configuration object
 
@@ -163,7 +163,7 @@ sub _build_logfile {
     my $self = shift;
 
     my $logfile = $self->config->val( 'global', 'logfile' )
-        || '/var/log/Sync.log';
+        || '/var/log/anysyncd.log';
     return $logfile;
 }
 
@@ -176,7 +176,7 @@ sub _logging_configuration {
     log4perl.appender.Logfile = Log::Log4perl::Appender::File
     log4perl.appender.Logfile.filename = $logfile
     log4perl.appender.Logfile.layout = Log::Log4perl::Layout::PatternLayout
-    log4perl.appender.Logfile.layout.ConversionPattern = %d %p %c %m%n
+    log4perl.appender.Logfile.layout.ConversionPattern = %d %p %c[%P] %m%n
     };
     return $config;
 }
@@ -225,7 +225,7 @@ after start => sub {
     my $self = shift;
 
     return unless $self->is_daemon;
-    $0 = 'Sync (manager process)';
+    $0 = 'anysyncd (manager process)';
 
     Log::Log4perl->init( $self->_logging_configuration );
 
@@ -273,6 +273,7 @@ after start => sub {
         my $notifier = AnyEvent::Filesys::Notify->new(
             dirs   => [$watcher],
             filter => sub { shift !~ /$filter/ },
+            parse_events => 1,
             cb     => sub {
                 $self->process( $section, @_ );
             }
@@ -319,8 +320,7 @@ sub _load {
 
 =head1 LICENSE
 
-This is released under the FIXME
-License. See B<FIXME>.
+This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 

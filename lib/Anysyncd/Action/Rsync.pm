@@ -1,11 +1,11 @@
-package Sync::Action::Rsync;
+package Anysyncd::Action::Rsync;
 
 use Moose;
 use File::Rsync;
 use AnyEvent::Util;
 use Carp qw(croak);
 
-extends 'Sync::Action::Base';
+extends 'Anysyncd::Action::Base';
 
 sub BUILD {
     my $self = shift;
