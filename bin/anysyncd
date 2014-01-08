@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use lib 'lib/';
+
+use Anysyncd::Daemon;
+
+my $daemon      = Anysyncd::Daemon->new_with_options();
+
+my ($command) = @{ $daemon->extra_argv };
+defined $command || die "No command specified";
+
+$daemon->start   if $command eq 'start';
+$daemon->status  if $command eq 'status';
+$daemon->restart if $command eq 'restart';
+$daemon->stop    if $command eq 'stop';
+
+exit( $daemon->exit_code );
+

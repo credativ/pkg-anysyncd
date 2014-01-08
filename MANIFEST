@@ -1,0 +1,7 @@
+bin/anysyncd
+Build.PL
+examples/sync.ini
+lib/Anysyncd/Action/Base.pm
+lib/Anysyncd/Action/Rsync.pm
+lib/Anysyncd/Daemon.pm
+MANIFEST			This list of files

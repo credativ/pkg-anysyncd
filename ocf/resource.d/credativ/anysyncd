@@ -1,0 +1,141 @@
+#!/bin/bash
+#
+#
+# License:      GNU General Public License (GPL)
+#
+# anysyncd
+#    Description: Manage a anysyncd process
+#         Author: Carsten Wolff <carsten.wolff@credativ.de>
+#         Author: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
+#
+#
+# usage: ./anysyncd {start|stop|status|monitor|validate-all|meta-data}
+#
+
+OCF_ROOT=/usr/lib/ocf
+: ${OCF_FUNCTIONS_DIR=${OCF_ROOT}/lib/heartbeat}
+. ${OCF_FUNCTIONS_DIR}/ocf-shellfuncs
+
+# Defaults
+OCF_RESKEY_binary_default="/usr/local/bin/anysyncd"
+
+: ${OCF_RESKEY_binary=${OCF_RESKEY_binary_default}}
+
+usage() {
+    cat <<-EOT
+    usage: $0 {start|stop|status|monitor|validate-all|meta-data}
+EOT
+}
+
+meta_data() {
+    cat <<-EOF
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="anysyncd">
+<version>1.0</version>
+
+<longdesc lang="en">
+Resource script for anysyncd.
+Manages a anysyncd.
+</longdesc>
+<shortdesc lang="en">Manages a anysyncd instance</shortdesc>
+
+<parameters>
+<parameter name="binary" unique="0" required="0">
+<longdesc lang="en">
+Location of the anysyncd binary
+</longdesc>
+<shortdesc lang="en">anysyncdr binary</shortdesc>
+<content type="string" default="${OCF_RESKEY_binary_default}" />
+</parameter>
+</parameters>
+
+<actions>
+<action name="start" timeout="30" />
+<action name="stop" timeout="30" />
+<action name="status" timeout="10" />
+<action name="monitor" depth="0" timeout="30" interval="20" />
+<action name="monitor" role="Master" depth="0" timeout="30" interval="10" />
+<action name="monitor" role="Slave" depth="0" timeout="30" interval="30" />
+<action name="promote" timeout="120" />
+<action name="demote" timeout="120" />
+<action name="notify" timeout="90" />
+<action name="validate-all" timeout="5" />
+<action name="meta-data" timeout="5" />
+</actions>
+</resource-agent>
+EOF
+}
+
+anysyncd_status() {
+	${OCF_RESKEY_binary} status
+
+	return $?
+}
+
+anysyncd_start() {
+	anysyncd_status
+
+	if [[ $? -eq 1 ]]; then
+		ocf_log info "START: starting anysyncd instance"
+		${OCF_RESKEY_binary} start
+	fi
+
+	while :
+	do
+		anysyncd_status
+		rc=$?
+		if [[ $rc -eq 0 ]]; then
+			break;
+		fi
+		sleep 1
+		ocf_log debug "anysyncd still not started. Waiting ..."
+	done
+	ocf_log info "anysyncd is started."
+
+	return $rc
+}
+
+anysyncd_stop() {
+	anysyncd_status
+
+	if [[ $? -eq $OCF_SUCCESS ]]; then
+		ocf_log info "stopping anysyncd"
+		${OCF_RESKEY_binary} stop
+	fi
+	return $?
+}
+
+anysyncd_monitor() {
+	if ocf_is_probe; then
+		ocf_log debug "$RESOURCE monitor PROBE"
+	else
+		ocf_log debug "$RESOURCE monitor"
+	fi
+
+	anysyncd_status
+	if [[ $? -ne 0 ]]; then
+		ocf_log warn "$RESOURCE monitor: anysyncd not running"
+		return $OCF_NOT_RUNNING
+	fi
+
+	ocf_log info "$RESOURCE monitor: anysyncd is running"
+	return $OCF_SUCCESS
+}
+
+case "$1" in
+  meta-data)    meta_data
+                exit $OCF_SUCCESS;;
+  usage|help)   usage
+                exit $OCF_SUCCESS;;
+esac
+
+case "$1" in
+  start)        anysyncd_start;;
+  stop)         anysyncd_stop;;
+  status)       anysyncd_status;;
+  monitor)      anysyncd_monitor;;
+  validate-all) exit $OCF_SUCCESS;;
+ *)             usage
+                exit $OCF_ERR_UNIMPLEMENTED;;
+esac
