@@ -111,7 +111,7 @@ has loglevel => (
 
 =item C<configfile>
 
-$self->configfile represents the configurationfile, it defaults to /etc/sync.ini
+$self->configfile represents the configurationfile, it defaults to /etc/anysyncd/anysyncd.ini
 
 =cut
 
@@ -119,7 +119,7 @@ has configfile => (
     is            => 'rw',
     isa           => 'Str',
     default       => '/etc/anysyncd/anysyncd.ini',
-    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
+    documentation => qq { configfile for anysyncd, defaults to '/etc/anysyncd/anysyncd.ini' }
 );
 
 =item C<config>
