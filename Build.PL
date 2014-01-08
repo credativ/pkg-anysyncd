@@ -14,10 +14,10 @@ use Module::Build::Debian;
 
 my $build = Module::Build->new
 (
-	dist_name => 'Sync',
+	dist_name => 'Anysyncd',
 	dist_abstract => 'Inotify based filesyncer',
 	dist_author => 'Alexander Wirt <alexander.wirt@credativ.de>',
-	dist_version_from => 'lib/Sync/Daemon.pm',
+	dist_version_from => 'lib/Anysyncd/Daemon.pm',
 	script_files => 'bin/',
     requires    => {
         'perl' => '5.10.0',

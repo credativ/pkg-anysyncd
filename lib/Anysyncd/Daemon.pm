@@ -2,7 +2,7 @@ package Anysyncd::Daemon;
 
 =head1 NAME
 
-Anysyncd::Daemon - Daemonizing for Sync
+Anysyncd::Daemon - Daemonizing for anysyncd
 
 =head1 SYNOPSIS
 
@@ -19,7 +19,7 @@ Anysyncd::Daemon - Daemonizing for Sync
 
 =head1 DESCRIPTION
 
-This module takes care of daemonizing the Sync daemon. It uses
+This module takes care of daemonizing the anysyncd daemon. It uses
 L<MooseX::Daemonize> for all the dirty work.
 
 The following functions provided by L<MooseX::Daemonize> are hidden
@@ -90,7 +90,7 @@ has logfile => (
     isa           => 'Str',
     builder       => '_build_logfile',
     lazy          => 1,
-    documentation => qq { logfile (default: /var/log/Sync.log) }
+    documentation => qq { logfile (default: /var/log/anysyncd.log) }
 );
 
 =item C<loglevel>
@@ -118,8 +118,8 @@ $self->configfile represents the configurationfile, it defaults to /etc/sync.ini
 has configfile => (
     is            => 'rw',
     isa           => 'Str',
-    default       => '/etc/sync.ini',
-    documentation => qq { configfile for Sync, defaults to '/etc/sync.ini' }
+    default       => '/etc/anysyncd/anysyncd.ini',
+    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
 );
 
 =item C<config>
@@ -163,7 +163,7 @@ sub _build_logfile {
     my $self = shift;
 
     my $logfile = $self->config->val( 'global', 'logfile' )
-        || '/var/log/Sync.log';
+        || '/var/log/anysyncd.log';
     return $logfile;
 }
 
