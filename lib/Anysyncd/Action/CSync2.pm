@@ -1,4 +1,4 @@
-package Sync::Action::CSync2;
+package Anysyncd::Action::CSync2;
 
 use Moose;
 use File::Rsync;
@@ -7,7 +7,7 @@ use AnyEvent::Util;
 use File::DirCompare;
 use Carp qw(croak);
 
-extends 'Sync::Action::Base';
+extends 'Anysyncd::Action::Base';
 
 has _retry_interval => (
     is => 'rw',

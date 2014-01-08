@@ -1,4 +1,4 @@
-package Sync::Action::Base;
+package Anysyncd::Action::Base;
 
 use Moose;
 use MooseX::AttributeHelpers;

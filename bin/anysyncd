@@ -8,9 +8,9 @@ use lib "$FindBin::Bin/../lib";
 
 use lib 'lib/';
 
-use Sync::Daemon;
+use Anysyncd::Daemon;
 
-my $daemon = Sync::Daemon->new_with_options();
+my $daemon      = Anysyncd::Daemon->new_with_options();
 
 my ($command) = @{ $daemon->extra_argv };
 defined $command || die "No command specified";

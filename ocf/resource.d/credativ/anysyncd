@@ -3,13 +3,13 @@
 #
 # License:      GNU General Public License (GPL)
 #
-# Sync
-#    Description: Manage a Sync process
+# anysyncd
+#    Description: Manage a anysyncd process
 #         Author: Carsten Wolff <carsten.wolff@credativ.de>
 #         Author: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
 #
 #
-# usage: ./Sync {start|stop|status|monitor|validate-all|meta-data}
+# usage: ./anysyncd {start|stop|status|monitor|validate-all|meta-data}
 #
 
 OCF_ROOT=/usr/lib/ocf
@@ -17,7 +17,7 @@ OCF_ROOT=/usr/lib/ocf
 . ${OCF_FUNCTIONS_DIR}/ocf-shellfuncs
 
 # Defaults
-OCF_RESKEY_binary_default="/usr/local/bin/Sync"
+OCF_RESKEY_binary_default="/usr/local/bin/anysyncd"
 
 : ${OCF_RESKEY_binary=${OCF_RESKEY_binary_default}}
 
@@ -31,21 +31,21 @@ meta_data() {
     cat <<-EOF
 <?xml version="1.0"?>
 <!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
-<resource-agent name="Sync">
+<resource-agent name="anysyncd">
 <version>1.0</version>
 
 <longdesc lang="en">
-Resource script for Sync.
-Manages a Sync.
+Resource script for anysyncd.
+Manages a anysyncd.
 </longdesc>
 <shortdesc lang="en">Manages a lsysncd instance</shortdesc>
 
 <parameters>
 <parameter name="binary" unique="0" required="0">
 <longdesc lang="en">
-Location of the Sync binary
+Location of the anysyncd binary
 </longdesc>
-<shortdesc lang="en">Syncr binary</shortdesc>
+<shortdesc lang="en">anysyncdr binary</shortdesc>
 <content type="string" default="${OCF_RESKEY_binary_default}" />
 </parameter>
 </parameters>
@@ -67,59 +67,59 @@ Location of the Sync binary
 EOF
 }
 
-Sync_status() {
+anysyncd_status() {
 	${OCF_RESKEY_binary} status
 
 	return $?
 }
 
-Sync_start() {
-	Sync_status
+anysyncd_start() {
+	anysyncd_status
 
 	if [[ $? -eq 1 ]]; then
-		ocf_log info "START: starting Sync instance"
+		ocf_log info "START: starting anysyncd instance"
 		${OCF_RESKEY_binary} start
 	fi
 
 	while :
 	do
-		Sync_status
+		anysyncd_status
 		rc=$?
 		if [[ $rc -eq 0 ]]; then
 			break;
 		fi
 		sleep 1
-		ocf_log debug "Sync still not started. Waiting ..."
+		ocf_log debug "anysyncd still not started. Waiting ..."
 	done
-	ocf_log info "Sync is started."
+	ocf_log info "anysyncd is started."
 
 	return $rc
 }
 
-Sync_stop() {
-	Sync_status
+anysyncd_stop() {
+	anysyncd_status
 
 	if [[ $? -eq $OCF_SUCCESS ]]; then
-		ocf_log info "stopping Sync"
+		ocf_log info "stopping anysyncd"
 		${OCF_RESKEY_binary} stop
 	fi
 	return $?
 }
 
-Sync_monitor() {
+anysyncd_monitor() {
 	if ocf_is_probe; then
 		ocf_log debug "$RESOURCE monitor PROBE"
 	else
 		ocf_log debug "$RESOURCE monitor"
 	fi
 
-	Sync_status
+	anysyncd_status
 	if [[ $? -ne 0 ]]; then
-		ocf_log warn "$RESOURCE monitor: Sync not running"
+		ocf_log warn "$RESOURCE monitor: anysyncd not running"
 		return $OCF_NOT_RUNNING
 	fi
 
-	ocf_log info "$RESOURCE monitor: Sync is running"
+	ocf_log info "$RESOURCE monitor: anysyncd is running"
 	return $OCF_SUCCESS
 }
 
@@ -131,10 +131,10 @@ case "$1" in
 esac
 
 case "$1" in
-  start)        Sync_start;;
-  stop)         Sync_stop;;
-  status)       Sync_status;;
-  monitor)      Sync_monitor;;
+  start)        anysyncd_start;;
+  stop)         anysyncd_stop;;
+  status)       anysyncd_status;;
+  monitor)      anysyncd_monitor;;
   validate-all) exit $OCF_SUCCESS;;
  *)             usage
                 exit $OCF_ERR_UNIMPLEMENTED;;

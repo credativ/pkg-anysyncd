@@ -1,13 +1,13 @@
-package Sync::Daemon;
+package Anysyncd::Daemon;
 
 =head1 NAME
 
-Sync::Daemon - Daemonizing for Sync
+Anysyncd::Daemon - Daemonizing for Sync
 
 =head1 SYNOPSIS
 
-    use Sync::Daemon;
-    my $daemon = Sync::Daemon->new_with_options();
+    use Anysyncd::Daemon;
+    my $daemon = Anysyncd::Daemon->new_with_options();
     my ($command) = @{$daemon->extra_argv};
 
     $daemon->start   if $command eq 'start';
@@ -225,7 +225,7 @@ after start => sub {
     my $self = shift;
 
     return unless $self->is_daemon;
-    $0 = 'Sync (manager process)';
+    $0 = 'anysyncd (manager process)';
 
     Log::Log4perl->init( $self->_logging_configuration );
 
