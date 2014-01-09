@@ -106,7 +106,7 @@ has loglevel => (
     isa           => 'Str',
     builder       => '_build_loglevel',
     lazy          => 1,
-    documentation => qq { log4perl compatible loglevel (default: DEBUG) }
+    documentation => qq { log4perl compatible loglevel (default: INFO) }
 );
 
 =item C<configfile>
@@ -156,7 +156,7 @@ has 'files' => (
 
 sub _build_loglevel {
     my $self = shift;
-    return $self->config->val( 'global', 'loglevel' ) || 'DEBUG';
+    return $self->config->val( 'global', 'loglevel' ) || 'INFO';
 }
 
 sub _build_logfile {
