@@ -106,12 +106,12 @@ has loglevel => (
     isa           => 'Str',
     builder       => '_build_loglevel',
     lazy          => 1,
-    documentation => qq { log4perl compatible loglevel (default: DEBUG) }
+    documentation => qq { log4perl compatible loglevel (default: INFO) }
 );
 
 =item C<configfile>
 
-$self->configfile represents the configurationfile, it defaults to /etc/sync.ini
+$self->configfile represents the configurationfile, it defaults to /etc/anysyncd/anysyncd.ini
 
 =cut
 
@@ -119,7 +119,7 @@ has configfile => (
     is            => 'rw',
     isa           => 'Str',
     default       => '/etc/anysyncd/anysyncd.ini',
-    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
+    documentation => qq { configfile for anysyncd, defaults to '/etc/anysyncd/anysyncd.ini' }
 );
 
 =item C<config>
@@ -156,7 +156,7 @@ has 'files' => (
 
 sub _build_loglevel {
     my $self = shift;
-    return $self->config->val( 'global', 'loglevel' ) || 'DEBUG';
+    return $self->config->val( 'global', 'loglevel' ) || 'INFO';
 }
 
 sub _build_logfile {
