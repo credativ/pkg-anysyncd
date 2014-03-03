@@ -92,4 +92,14 @@ sub add_files {
 
 1;
 
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Alexander Wirt <alexander.wirt@credativ.de>
+
+=cut
+
 # vim: syntax=perl sw=4 ts=4 et shiftround
