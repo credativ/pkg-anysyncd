@@ -116,10 +116,11 @@ $self->configfile represents the configurationfile, it defaults to /etc/sync.ini
 =cut
 
 has configfile => (
-    is            => 'rw',
-    isa           => 'Str',
-    default       => '/etc/anysyncd/anysyncd.ini',
-    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
+    is      => 'rw',
+    isa     => 'Str',
+    default => '/etc/anysyncd/anysyncd.ini',
+    documentation =>
+        qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
 );
 
 =item C<config>
@@ -251,8 +252,10 @@ after start => sub {
             $config_for_handler->{name} = $sect_t;
         }
 
-        $self->log->debug( sprintf('Configuration for section "$section": %s',
-            Dumper($config_for_handler) ));
+        $self->log->debug(
+            sprintf( 'Configuration for section "$section": %s',
+                Dumper($config_for_handler) )
+        );
 
         my $obj =
             $self->_load( $section, $handler, "new",
@@ -271,10 +274,10 @@ after start => sub {
             || '\.(swp|tmp)$';
 
         my $notifier = AnyEvent::Filesys::Notify->new(
-            dirs   => [$watcher],
-            filter => sub { shift !~ /$filter/ },
+            dirs         => [$watcher],
+            filter       => sub { shift !~ /$filter/ },
             parse_events => 1,
-            cb     => sub {
+            cb           => sub {
                 $self->process( $section, @_ );
             }
         );
