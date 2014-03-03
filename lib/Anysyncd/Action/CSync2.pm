@@ -232,4 +232,16 @@ sub _report_error {
 
 1;
 
+=pod
+
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Carsten Wolff <carsten.wolff@credativ.de>
+
+=cut
+
 # vim: syntax=perl sw=4 ts=4 et shiftround
