@@ -3,7 +3,7 @@ Section: perl
 Priority: optional
 Maintainer: Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
 Build-Depends: debhelper (>= 8),
- perl
+ perl, quilt
 Standards-Version: 3.9.5
 Homepage: http://github.com/formorer/AnySyncd
 
