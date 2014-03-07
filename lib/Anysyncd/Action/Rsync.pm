@@ -1,5 +1,29 @@
 package Anysyncd::Action::Rsync;
 
+=pod
+=head1 NAME
+
+Anysyncd::Action::Rsync - Rsync based syncer for AnySyncd
+
+=head1 SYNOPSIS
+
+[syncpair]
+
+handler = Anysyncd::Action::Rsync
+from = /tmp/testdir
+to = /tmp/testdir2
+watcher = /tmp/testdir
+
+=head1 DESCRIPTION
+
+Anysyncd::Action::Rsync is an rsync based syncer for AnySyncd, it calls rsync
+for every change event. If there are any later events after the first sync, it tries
+up to three time to sync the whole tree, until there are any new events.
+
+It doesn't accept any Syncer specific options.
+
+=cut
+
 use Moose;
 use File::Rsync;
 use AnyEvent::Util;
@@ -80,5 +104,17 @@ sub process_files {
 }
 
 1;
+
+=pod
+
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Alexander Wirt <alexander.wirt@credativ.de>
+
+=cut
 
 # vim: syntax=perl sw=4 ts=4 et shiftround

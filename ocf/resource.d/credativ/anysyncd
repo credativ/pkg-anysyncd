@@ -17,7 +17,7 @@ OCF_ROOT=/usr/lib/ocf
 . ${OCF_FUNCTIONS_DIR}/ocf-shellfuncs
 
 # Defaults
-OCF_RESKEY_binary_default="/usr/local/bin/anysyncd"
+OCF_RESKEY_binary_default="/usr/bin/anysyncd"
 
 : ${OCF_RESKEY_binary=${OCF_RESKEY_binary_default}}
 

@@ -31,7 +31,9 @@ sub BUILD {
     my $self = shift;
 
     $self->log(
-        Log::Log4perl->get_logger( $self->config->{handler} .  '::' . $self->config->{name} )
+        Log::Log4perl->get_logger(
+            $self->config->{handler} . '::' . $self->config->{name}
+        )
     );
     my $share = IPC::ShareLite->new(
         -key     => int( rand(4) ),
@@ -43,11 +45,12 @@ sub BUILD {
     $self->_files->store( freeze( [] ) );
 
     if ( $self->config->{'cron'} ) {
-        AnyEvent::DateTime::Cron->new()
-            ->add( $self->config->{'cron'} => sub {
-                $self->process_files('full') if ( !$self->_timer and $self->_is_unlocked );
-            } )
-            ->start;
+        AnyEvent::DateTime::Cron->new()->add(
+            $self->config->{'cron'} => sub {
+                $self->process_files('full')
+                    if ( !$self->_timer and $self->_is_unlocked );
+            }
+        )->start;
     }
 }
 
@@ -91,5 +94,15 @@ sub add_files {
 }
 
 1;
+
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Alexander Wirt <alexander.wirt@credativ.de>
+
+=cut
 
 # vim: syntax=perl sw=4 ts=4 et shiftround
