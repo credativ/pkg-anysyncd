@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 use warnings;
 use strict;
 
@@ -28,6 +30,7 @@ my $build = Module::Build->new
         'AnyEvent::DateTime::Cron' => 0,
         'IPC::ShareLite' => 0,
         'File::Rsync' => 0,
+        'MooseX::Daemonize.pm' => 0,
     },
     #config_files => { map { $_ => $_ } bsd_glob('reports/*') },
     #install_path => { 'conf'  => '/etc/osfsum/reports' },

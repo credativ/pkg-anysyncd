@@ -106,12 +106,12 @@ has loglevel => (
     isa           => 'Str',
     builder       => '_build_loglevel',
     lazy          => 1,
-    documentation => qq { log4perl compatible loglevel (default: DEBUG) }
+    documentation => qq { log4perl compatible loglevel (default: INFO) }
 );
 
 =item C<configfile>
 
-$self->configfile represents the configurationfile, it defaults to /etc/sync.ini
+$self->configfile represents the configurationfile, it defaults to /etc/anysyncd/anysyncd.ini
 
 =cut
 
@@ -119,7 +119,7 @@ has configfile => (
     is            => 'rw',
     isa           => 'Str',
     default       => '/etc/anysyncd/anysyncd.ini',
-    documentation => qq { configfile for anysyncd, defaults to '/etc/sync.ini' }
+    documentation => qq { configfile for anysyncd, defaults to '/etc/anysyncd/anysyncd.ini' }
 );
 
 =item C<config>
@@ -156,7 +156,7 @@ has 'files' => (
 
 sub _build_loglevel {
     my $self = shift;
-    return $self->config->val( 'global', 'loglevel' ) || 'DEBUG';
+    return $self->config->val( 'global', 'loglevel' ) || 'INFO';
 }
 
 sub _build_logfile {
@@ -251,8 +251,10 @@ after start => sub {
             $config_for_handler->{name} = $sect_t;
         }
 
-        $self->log->debug( sprintf('Configuration for section "$section": %s',
-            Dumper($config_for_handler) ));
+        $self->log->debug(
+            sprintf( 'Configuration for section "$section": %s',
+                Dumper($config_for_handler) )
+        );
 
         my $obj =
             $self->_load( $section, $handler, "new",
@@ -271,10 +273,10 @@ after start => sub {
             || '\.(swp|tmp)$';
 
         my $notifier = AnyEvent::Filesys::Notify->new(
-            dirs   => [$watcher],
-            filter => sub { shift !~ /$filter/ },
+            dirs         => [$watcher],
+            filter       => sub { shift !~ /$filter/ },
             parse_events => 1,
-            cb     => sub {
+            cb           => sub {
                 $self->process( $section, @_ );
             }
         );
