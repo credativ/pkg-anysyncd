@@ -9,7 +9,7 @@ Homepage: http://github.com/formorer/AnySyncd
 
 Package: anysyncd
 Architecture: all
-Depends: ${perl:Depends},
+Depends: ${perl:Depends}, ${misc:Depends},
     libmoose-perl,
     libmoosex-attributehelpers-perl,
     libanyevent-filesys-notify-perl,

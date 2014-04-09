@@ -1,3 +1,9 @@
+anysyncd (1.2-3) UNRELEASED; urgency=low
+
+  * Add missing misc-Depends placeholder to depends 
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Wed, 09 Apr 2014 11:21:35 +0200
+
 anysyncd (1.2-2) unstable; urgency=low
 
   * Add build-dependency on quilt
