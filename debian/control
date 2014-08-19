@@ -12,6 +12,7 @@ Architecture: all
 Depends: ${perl:Depends}, ${misc:Depends},
     libmoose-perl,
     libmoosex-attributehelpers-perl,
+    libmoosex-daemonize-perl,
     libanyevent-filesys-notify-perl,
     liblog-log4perl-perl,
     libconfig-inifiles-perl,
