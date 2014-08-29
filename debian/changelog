@@ -1,3 +1,10 @@
+anysyncd (1.4-2) unstable; urgency=medium
+
+  [ Bastian Blank ]
+  * Depend on libmoosex-daemonize-perl
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Fri, 29 Aug 2014 08:08:45 +0200
+
 anysyncd (1.4-1) unstable; urgency=medium
 
   * New upstream release
