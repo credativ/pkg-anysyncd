@@ -1,3 +1,9 @@
+anysyncd (1.4-4) UNRELEASED; urgency=medium
+
+  * Updated dependencies 
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 06 Jan 2015 12:30:30 +0100
+
 anysyncd (1.4-3) unstable; urgency=medium
 
   * Fix status action of init script

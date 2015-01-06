@@ -19,7 +19,8 @@ Depends: ${perl:Depends}, ${misc:Depends},
     libanyevent-datetime-cron-perl, 
     libipc-sharelite-perl,
     libfile-rsync-perl,
-    libnet-openssh-perl
+    libnet-openssh-perl,
+    libfile-dircompare-perl
 Recommends: csync2
 Description: daemon to synchronize files
  anysyncd is a daemon that allows watching directories with inotify and
