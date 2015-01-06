@@ -16,7 +16,7 @@ DESC="anysyncd"
 NAME=anysyncd
 DAEMON=/usr/bin/$NAME
 DAEMON_ARGS="--options args"
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/${NAME}_daemon.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
@@ -79,7 +79,7 @@ case "$1" in
 	esac
 	;;
   status)
-	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+	status_of_proc -p "$PIDFILE" "$DAEMON" "$NAME" && exit 0 || exit $?
 	;;
   restart|force-reload)
 	#
