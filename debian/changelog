@@ -1,8 +1,8 @@
-anysyncd (1.4-4) UNRELEASED; urgency=medium
+anysyncd (1.4-4) unstable; urgency=medium
 
   * Updated dependencies 
 
- -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 06 Jan 2015 12:30:30 +0100
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Wed, 07 Jan 2015 13:10:01 +0100
 
 anysyncd (1.4-3) unstable; urgency=medium
 
