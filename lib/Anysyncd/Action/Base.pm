@@ -80,7 +80,7 @@ sub add_files {
     my @new_files = (@_);
 
     $self->files(@new_files);
-    $self->log->info( "Added " . join( " ", @new_files ) );
+    $self->log->debug( "Added " . join( " ", @new_files ) . " to files queue" );
 
     if ( !$self->_timer && $self->_is_unlocked ) {
         my $waiting_time = $self->config->{'waiting_time'} || 5;
