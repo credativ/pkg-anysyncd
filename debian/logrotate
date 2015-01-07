@@ -1,0 +1,10 @@
+/var/log/anysyncd.log {
+    daily
+    dateext
+    compress
+    delaycompress
+    rotate 30
+    missingok
+    nocreate
+    sharedscripts
+}
