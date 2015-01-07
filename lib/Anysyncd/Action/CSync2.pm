@@ -4,6 +4,8 @@ use Moose;
 use File::Rsync;
 use Net::OpenSSH;
 use AnyEvent::Util;
+use File::Basename qw(basename dirname);
+use File::Spec;
 use File::DirCompare;
 use Carp qw(croak);
 
@@ -127,6 +129,8 @@ sub process_files {
 sub _commit_remote {
     my ($self)   = @_;
     my $proddir  = $self->config->{'prod_dir'};
+    my ($basedir, $name) = (dirname($proddir), basename($proddir));
+    my $proddir_tmp = File::Spec->join($basedir, ".$name.tmp");
     my $csyncdir = $self->config->{'csync_dir'};
     $proddir  =~ s/\/*$//;
     $csyncdir =~ s/\/*$//;
@@ -136,10 +140,10 @@ sub _commit_remote {
     for my $host ( split( '\s+', $self->config->{'remote_hosts'} ) ) {
         my $ssh = Net::OpenSSH->new($host);
 
-        my $ok = $ssh->test("rsync -caHAXq --delete $csyncdir/ $proddir.tmp");
+        my $ok = $ssh->test("rsync -caHAXq --delete $csyncdir/ $proddir_tmp");
 
         if ($ok) {
-            $ok = $ssh->test("diff -qrN $csyncdir $proddir.tmp");
+            $ok = $ssh->test("diff -qrN $csyncdir $proddir_tmp");
         }
 
         if ($ok) {
@@ -147,9 +151,9 @@ sub _commit_remote {
                 if [ -d $proddir ]; then
                     mv $proddir $proddir.bak;
                 fi;
-                mv $proddir.tmp $proddir;
+                mv $proddir_tmp $proddir;
                 if [ -d $proddir.bak ]; then
-                    mv $proddir.bak $proddir.tmp;
+                    mv $proddir.bak $proddir_tmp;
                 fi;"
             );
         }
