@@ -21,7 +21,10 @@ Depends: ${perl:Depends}, ${misc:Depends},
     libfile-rsync-perl,
     libnet-openssh-perl,
     libfile-dircompare-perl,
-    libfile-spec-perl
+    libfile-spec-perl,
+    libemail-mime-perl,
+    libemail-sender-perl,
+    libtry-tiny-perl
 Recommends: csync2
 Description: daemon to synchronize files
  anysyncd is a daemon that allows watching directories with inotify and
