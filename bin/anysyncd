@@ -6,26 +6,29 @@ Anysyncd - event driven sync framework
 
 =head1 DESCRIPTION
 
-Anysyncd provides a generic framework to do file synchronisation. It is based on AnyEventd
-and Inotify. That means that file events are provided more or less in realtime to the Sync
-Modules.
+Anysyncd provides a generic framework to do file synchronisation. It is based on
+AnyEvent and Inotify. That means that file events are provided more or less in
+realtime to the Sync Modules.
 
-Currently L<Csync2|AnySyncd::Action::CSync2> and L<Rsync|AnySyncd::Action::Rsync> based syncers are
-supported. See L<Csync2|AnySyncd::Action::CSync2> and L<AnySyncd::Action::Rsync> for details.
+Currently L<Csync2|AnySyncd::Action::CSync2> and L<Rsync|AnySyncd::Action::Rsync>
+based syncers are supported. See L<Csync2|AnySyncd::Action::CSync2> and
+L<AnySyncd::Action::Rsync> for details.
 
 =head2 Configuration File
 
-Configuration happens in F</etc/anysyncd/anysyncd.ini>. F<anysyncd.ini> is a section driven ini file.
-The I<global> section is special, as the name says it contains configuration options global to the whole framework.
+Configuration happens in F</etc/anysyncd/anysyncd.ini>. F<anysyncd.ini> is a
+section driven ini file. The I<global> section is special, as the name says it
+contains configuration options global to the whole framework.
 
-Any other section is the description of a sync action. And may contain general and/or syncer specific configuration parameters.
-See syncer parameters are described in the documentation of the specific syncer.
+Any other section is the description of a sync action. And may contain general
+and/or syncer specific configuration parameters. See syncer parameters are
+described in the documentation of the specific syncer.
 
 =head3 Global options
 
 =over
 
-=item C<logfile> I<filename> 
+=item C<logfile> I<filename>
 
 The logfile for the AnySyncd Daemon. Defaults to /var/log/anysyncd.log.
 
@@ -49,14 +52,15 @@ The file- or directoryname that should be monitored for changes.
 
 =item C<filter> I<regular expression>
 
-A regular expressions that describes files that should be ignored from the watcher.
-Please not that this doesn't prevent that files from getting synced. To ignore some typical
-tempfiles from several editors try for example:  \.(swp|tmp)$ as  a filter.
+A regular expressions that describes files that should be ignored from the
+watcher. Please note that this doesn't prevent that files from getting synced.
+To ignore some typical tempfiles from several editors try for example:
+\.(swp|tmp)$ as a filter.
 
 =item C<cron> I<cron spec>
 
-A cron spec makes it possible to regulary execute a sync. To execute a sync every minute, regardless
-of any changes try: */1 * * * * as a cron spec.
+A cron spec makes it possible to regulary execute a sync. To execute a sync
+every minute, regardless of any changes try: */1 * * * * as a cron spec.
 
 =back
 
