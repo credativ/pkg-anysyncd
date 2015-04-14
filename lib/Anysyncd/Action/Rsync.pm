@@ -17,8 +17,8 @@ watcher = /tmp/testdir
 =head1 DESCRIPTION
 
 Anysyncd::Action::Rsync is an rsync based syncer for AnySyncd, it calls rsync
-for every change event. If there are any later events after the first sync, it tries
-up to three time to sync the whole tree, until there are any new events.
+for every change event. If there are any later events after the first sync, it
+tries up to three time to sync the whole tree, until there are any new events.
 
 It doesn't accept any Syncer specific options.
 
@@ -45,15 +45,14 @@ sub BUILD {
 
 sub process_files {
     my $self = shift;
-    $self->_timer(undef);
+    $self->_lock();
     $self->log->debug("Processing files");
 
     if ( !scalar @{ $self->files() } ) {
         $self->log->debug("No files to sync");
+        $self->_unlock();
         return;
     }
-
-    $self->_lock();
 
     my $rsync = File::Rsync->new(
         archive      => 1,
@@ -99,6 +98,7 @@ sub process_files {
             croak("There was an error in the fork call: $@");
         }
         $self->log->info("rsync calls done");
+        $self->_stamp_file( "success", time() );
         $self->_unlock();
     };
 }
