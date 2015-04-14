@@ -1,3 +1,13 @@
+anysyncd (1.8-1) unstable; urgency=medium
+
+  [ Carsten Wolff ]
+  * new depend for upcoming version on libstring-shellquote-perl
+
+  [ Patrick Schoenfeld ]
+  * Imported Upstream version 1.8
+
+ -- Patrick Schoenfeld <patrick.schoenfeld@credativ.de>  Tue, 14 Apr 2015 14:13:14 +0200
+
 anysyncd (1.7-1) unstable; urgency=medium
 
   * Add missing depend on libfile-spec-perl
