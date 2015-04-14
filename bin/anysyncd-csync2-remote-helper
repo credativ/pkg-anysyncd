@@ -1,0 +1,92 @@
+#!/usr/bin/perl
+# Helper tool for the anysyncd csync2 syncer which executes the remote commands
+# needed for the two-stage commit
+
+use strict;
+use warnings;
+
+use File::Basename qw(basename dirname);
+use File::Spec;
+use File::Copy;
+use Getopt::Long;
+use Config::IniFiles;
+use Anysyncd::Action::CSync2::Utils;
+
+my $cfgfile = "/etc/anysyncd/anysyncd.ini";
+my $verbose = 0;
+
+GetOptions(
+    "cfg"     => \$cfgfile,
+    "verbose" => \$verbose,
+);
+
+my $action = shift;
+my $syncer = shift;
+
+if ( !$action ) {
+    die "action argument is required";
+}
+if ( !$syncer ) {
+    die "syncer argument is required";
+}
+
+my $cfg = Config::IniFiles->new( -file => '/etc/anysyncd/anysyncd.ini' );
+if ( !$cfg->SectionExists($syncer) ) {
+    die "no sync cfg named '$syncer' defined in /etc/anysyncd/anysyncd.ini";
+}
+
+my $handler_cfg;
+foreach my $k ( $cfg->Parameters($syncer) ) {
+    $handler_cfg->{$k} = $cfg->val( $syncer, $k );
+}
+
+my $utils = Anysyncd::Action::CSync2::Utils->new( { name => $syncer } );
+
+my $proddir = $handler_cfg->{prod_dir};
+$proddir =~ s/\/*$//;
+my ( $basedir, $name ) = ( dirname($proddir), basename($proddir) );
+my $proddir_tmp = File::Spec->join( $basedir, ".$name.tmp" );
+my $csyncdir = $handler_cfg->{'csync_dir'};
+$csyncdir =~ s/\/*$//;
+
+my $err    = 0;
+my $errstr = "";
+if ( $action eq 'commit' ) {
+    ( $err, $errstr ) = $utils->rsync( $csyncdir, $proddir_tmp );
+    if ( !$err and -d $proddir ) {
+        $err = !move( $proddir, "$proddir.bak" );
+        $errstr = $! if $err;
+    }
+    if ( !$err ) {
+        $err = !move( $proddir_tmp, $proddir );
+        $errstr = $! if $err;
+    }
+    if ( !$err and -d "$proddir.bak" ) {
+        $err = !move( "$proddir.bak", $proddir_tmp );
+        $errstr = $! if $err;
+    }
+} elsif ( $action eq 'stamps' ) {
+    my @stamps = ();
+    foreach my $type ( "success", "lastchange" ) {
+        my $stamp = "";
+        my $fn    = "/var/lib/anysyncd/" . $name . "_" . $type . "_stamp";
+        if ( -f $fn ) {
+            if ( open( my $fh, "<", $fn ) ) {
+                $stamp = do { local $/ = <$fh> };
+                close $fh;
+            } else {
+                $err++;
+                $errstr .= "Failed to open $fn: $!";
+            }
+        }
+        push( @stamps, $stamp );
+    }
+    print join( ":", @stamps );
+} else {
+    die "unknown action '$action'";
+}
+
+print STDERR $errstr if ( $err and $errstr );
+exit $err;
+
+# vim: syntax=perl sw=4 ts=4 et shiftround

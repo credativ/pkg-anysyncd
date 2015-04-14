@@ -1,13 +1,11 @@
 package Anysyncd::Action::CSync2;
 
 use Moose;
-use File::Rsync;
 use Net::OpenSSH;
 use AnyEvent::Util;
-use File::Basename qw(basename dirname);
-use File::Spec;
-use File::DirCompare;
 use Carp qw(croak);
+use String::ShellQuote;
+use Anysyncd::Action::CSync2::Utils;
 
 extends 'Anysyncd::Action::Base';
 
@@ -123,47 +121,48 @@ sub process_files {
 
 sub _commit_remote {
     my ($self) = @_;
-    my $proddir = $self->config->{'prod_dir'};
-    my ( $basedir, $name ) = ( dirname($proddir), basename($proddir) );
-    my $proddir_tmp = File::Spec->join( $basedir, ".$name.tmp" );
-    my $csyncdir = $self->config->{'csync_dir'};
-    $proddir =~ s/\/*$//;
-    $csyncdir =~ s/\/*$//;
     my $errstr = "";
     my $err    = 0;
 
     $self->log->debug("_commit_remote(): sub got called");
 
     for my $host ( split( '\s+', $self->config->{'remote_hosts'} ) ) {
-        my $ssh = Net::OpenSSH->new($host);
+        my ( $l_err, $l_errstr ) = $self->_remote_cmd(
+            $host,    "anysyncd-csync2-remote-helper",
+            "commit", $self->config->{name}
+        );
 
-        my $ok = $ssh->test("rsync -caHAXq --delete $csyncdir/ $proddir_tmp");
-
-        if ($ok) {
-            $ok = $ssh->test("diff -qrN $csyncdir $proddir_tmp");
-        }
-
-        if ($ok) {
-            $ok = $ssh->test( "
-                if [ -d $proddir ]; then
-                    mv $proddir $proddir.bak;
-                fi;
-                mv $proddir_tmp $proddir;
-                if [ -d $proddir.bak ]; then
-                    mv $proddir.bak $proddir_tmp;
-                fi;"
-            );
-        }
-
-        if ($ok) {
-            $self->log->debug("_commit_remote(): committing $host succeeded");
-        } else {
+        if ($l_err) {
             $err++;
             $errstr .= "_commit_remote(): committing $host failed: "
-                . $ssh->error . "\n\n";
+                . $l_errstr . "\n\n";
+        } else {
+            $self->log->debug("_commit_remote(): committing $host succeeded");
         }
     }
     return ( $err, $errstr );
+}
+
+sub _remote_cmd {
+    my ( $self, $host, @cmd ) = @_;
+    my ( $err, $errstr ) = ( 0, "" );
+    my $ssh = Net::OpenSSH->new($host);
+    my $remote_prefix_cmd = $self->config->{'remote_prefix_command'} || undef;
+
+    if ($remote_prefix_cmd) {
+        unshift @cmd, $remote_prefix_cmd;
+    }
+
+    $self->log->debug( "_remote_cmd(): " . join( " ", @cmd ) );
+
+    my ( $out, $err_out ) = $ssh->capture2(@cmd);
+
+    if ( $ssh->error or $err_out ) {
+        $err++;
+        $errstr = $ssh->error if $ssh->error;
+        $errstr = ( $errstr ? "$errstr: $err_out" : $err_out ) if $err_out;
+    }
+    return ( $err, $errstr, $out );
 }
 
 sub _csync2 {
@@ -172,7 +171,9 @@ sub _csync2 {
 
     $self->log->debug("_csync2(): sub got called");
 
-    my $csync_out = `csync2 -x 2>&1`;
+    my $cmd =
+        "csync2 -x -G " . shell_quote( $self->config->{name} ) . " 2>&1";
+    my $csync_out = `$cmd`;
     $err = $?;
     if ($err) {
         $errstr = "_csync2(): csync2 failed with $err: $csync_out";
@@ -184,83 +185,32 @@ sub _local_rsync {
     my ($self)   = @_;
     my $proddir  = $self->config->{'prod_dir'};
     my $csyncdir = $self->config->{'csync_dir'};
-    $proddir =~ s/\/*$//;
-    $csyncdir =~ s/\/*$//;
+    my $utils    = Anysyncd::Action::CSync2::Utils->new(
+        { name => $self->config->{name} } );
 
     $self->log->debug("_local_rsync(): sub got called");
-
-    my $rsync = File::Rsync->new(
-        'verbose'    => 1,
-        'archive'    => 1,
-        'delete'     => 1,
-        'checksum'   => 1,
-        'rsync-path' => '/usr/bin/rsync'
-    );
-
-    my $err = !$rsync->exec(
-        {   src  => $proddir . '/',
-            dest => $csyncdir
-        }
-    );
-
-    if ($err) {
-        $self->log->error( "_local_rsync(): Local rsync failed: "
-                . join( ' ; ', $rsync->out ) . ' ; '
-                . join( ' ; ', $rsync->err ) );
-    } elsif ( !$self->_dirs_equal( $proddir, $csyncdir ) ) {
-        $err = 2;
-        $self->log->error( "_local_rsync(): Local rsync succeeded, but "
-                . "directory equality did not check out." );
-    }
-
+    my ( $err, $errstr ) = $utils->rsync( $proddir, $csyncdir );
+    $self->log->info($errstr) if $err;
     return $err;
-}
-
-sub _dirs_equal {
-    my ( $self, $dir1, $dir2 ) = @_;
-
-    sleep 1;
-
-    my $equal = 1;
-    if ( not -d $dir2 ) {
-        $equal = 0;
-    } else {
-        File::DirCompare->compare(
-            $dir1, $dir2,
-            sub {
-                $equal = 0;    # every call of the sub indicates a change
-            }
-        );
-    }
-
-    return $equal;
 }
 
 sub _check_stamps {
     my ($self) = @_;
     my $errstr = "";
     my $err    = 0;
+    my $syncer = $self->config->{name};
 
     $self->log->debug("_check_stamps(): sub got called");
 
     for my $host ( split( '\s+', $self->config->{'remote_hosts'} ) ) {
-        my $ssh = Net::OpenSSH->new($host);
 
-        my $fn =
-            "/var/lib/anysyncd/" . $self->config->{name} . "_success_stamp";
-        my $succ = $ssh->capture("[ -f $fn ] && cat $fn; exit 0;");
-        $succ =~ s/[^0-9]//g;
+        my ( $l_err, $l_errstr, $out ) =
+            $self->_remote_cmd( $host, "anysyncd-csync2-remote-helper",
+            "stamps", $syncer );
 
-        unless ( $ssh->error ) {
-            $fn =
-                  "/var/lib/anysyncd/"
-                . $self->config->{name}
-                . "_lastchange_stamp";
-            my $lastchange = $ssh->capture("[ -f $fn ] && cat $fn; exit 0");
-            $lastchange =~ s/[^0-9]//g;
-
-            if (   !$ssh->error
-                and $succ
+        if ( not $l_err and $out =~ /^[0-9]{0,10}:[0-9]{0,10}$/ ) {
+            my ( $succ, $lastchange ) = split( ':', $out );
+            if (    $succ
                 and $lastchange
                 and ( $lastchange > $succ ) )
             {
@@ -270,11 +220,11 @@ sub _check_stamps {
             }
         }
 
-        if ( $ssh->error ) {
+        if ($l_err) {
             $err++;
             $errstr
                 .= "_check_stamps(): getting timestamps from $host failed: "
-                . $ssh->error . "\n\n";
+                . $l_errstr . "\n\n";
         }
 
         if ( !$err ) {
