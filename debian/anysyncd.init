@@ -75,7 +75,7 @@ case "$1" in
   status)
     status_of_proc -p "$PIDFILE" "$DAEMON" "$NAME" && exit 0 || exit $?
     ;;
-  reload)
+  reload|force-reload)
     [ "$VERBOSE" != no ] && log_daemon_msg "Reloading $DESC" "$NAME"
     start-stop-daemon --stop --signal HUP --quiet --pidfile $PIDFILE
     [ "$VERBOSE" != no ] && log_end_msg 0
