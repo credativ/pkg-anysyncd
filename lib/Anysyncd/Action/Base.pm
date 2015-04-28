@@ -1,5 +1,43 @@
 package Anysyncd::Action::Base;
 
+=head1 NAME
+
+Anysyncd::Action::Base - Common interface for all sync actions
+
+=head1 SYNOPSIS
+
+    use Anysyncd::Action::Base;
+    my $action = Anysyncd::Action::Base->new( config => $config );
+
+=head1 DESCRIPTION
+
+The base module for all syncer actions for anysyncd. It takes care of handling
+watcher events and defines the interface for all action implementations, which
+is very simple, all actions should look similar to this:
+
+    use Moose;
+    extends 'Anysyncd::Action::Base';
+
+    sub process_files {
+        $self->_lock();
+        fork_call {
+            for ( @{ $self->files() } ) {
+                ... do the actual sync
+            }
+            $self->files_clear;
+        }
+        sub {
+            $self->_stamp_file( "success", time() ) unless ($@);
+        };
+        $self->_unlock();
+    }
+
+=head2 Methods
+
+This class has no public methods.
+
+=cut
+
 use Moose;
 use MooseX::AttributeHelpers;
 
@@ -63,11 +101,6 @@ sub BUILD {
     }
 }
 
-sub files_clear {
-    my $self = shift;
-    $self->_files->store( freeze( [] ) );
-}
-
 sub _create_watcher {
     my $self = shift;
     if ( $self->_noop() ) {
@@ -101,6 +134,12 @@ sub _noop {
             and not -e $self->config->{'noop_file'} );
 }
 
+#
+# FIXME: The next 3 functions are not sufficient for syncer implementations
+# that want to synchronise only files gotten from events. For this to work,
+# there needs at least be a function to atomically "pop" files from the list
+# and the "files" method needs to be made atomic, too
+#
 sub files {
     my $self = shift;
     if (@_) {
@@ -141,6 +180,11 @@ sub add_files {
         $self->_timer($w);
         $self->_stamp_file( "lastchange", time() );
     }
+}
+
+sub files_clear {
+    my $self = shift;
+    $self->_files->store( freeze( [] ) );
 }
 
 sub _report_error {
@@ -207,7 +251,8 @@ This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 
-Alexander Wirt <alexander.wirt@credativ.de>
+Alexander Wirt <alexander.wirt@credativ.de>,
+Carsten Wolff <carsten.wolff@credativ.de>
 
 =cut
 

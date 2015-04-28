@@ -6,23 +6,23 @@ Anysyncd - event driven sync framework
 
 =head1 DESCRIPTION
 
-Anysyncd provides a generic framework to do file synchronisation. It is based on
-AnyEvent and Inotify. That means that file events are provided more or less in
-realtime to the Sync Modules.
+Anysyncd provides a generic framework to synchronize files as they change. It
+uses AnyEvent::Filesys::Notify to monitor files for changes and supports Plugins
+for the actual synchronisation.
 
-Currently L<Csync2|AnySyncd::Action::CSync2> and L<Rsync|AnySyncd::Action::Rsync>
-based syncers are supported. See L<Csync2|AnySyncd::Action::CSync2> and
+Currently a simple L<Rsync|AnySyncd::Action::Rsync> action and  a more complex
+L<Csync2|AnySyncd::Action::CSync2> action are provided by the anysyncd
+distribution.  See L<Csync2|AnySyncd::Action::CSync2> and
 L<AnySyncd::Action::Rsync> for details.
 
 =head2 Configuration File
 
 Configuration happens in F</etc/anysyncd/anysyncd.ini>. F<anysyncd.ini> is a
-section driven ini file. The I<global> section is special, as the name says it
-contains configuration options global to the whole framework.
-
-Any other section is the description of a sync action. And may contain general
-and/or syncer specific configuration parameters. See syncer parameters are
-described in the documentation of the specific syncer.
+section driven ini file. Each directory to be watched and synced (a syncer) has
+it's own ini section. The I<global> section contains configuration options
+global to the whole framework. Also, all options from the I<global> section
+are passed down to the syncer configuration, i.e. syncers can share common
+options via the glocbal section.
 
 =head3 Global options
 
@@ -38,29 +38,58 @@ log4perl compatible loglevel, defaults to debug.
 
 =back
 
-=head3 Syncer specific options
+=head3 Syncer options
+
+These options are interpreted by syncers, but may also be defined in the global
+section in which case they take effect for all syncers, unless overridden.
 
 =over
 
 =item C<handler> I<classname of handler>
 
-The handler responsible for syncing. (i.e. Anysyncd::Action::Rsync)
+The handler responsible for syncing. (e.g. Anysyncd::Action::Rsync)
 
 =item C<watcher> I<directory or filename>
 
-The file- or directoryname that should be monitored for changes.
+The file- or directoryname that shall be monitored for changes.
 
 =item C<filter> I<regular expression>
 
-A regular expressions that describes files that should be ignored from the
-watcher. Please note that this doesn't prevent that files from getting synced.
-To ignore some typical tempfiles from several editors try for example:
-\.(swp|tmp)$ as a filter.
+A regular expression that describes files that should be ignored from the
+watcher. Please note that currently, this doesn't prevent these files from
+getting synced by the Rsync or CSync2 actions.  To ignore some typical
+tempfiles from several editors try for example: \.(swp|tmp)$ as a filter.
 
 =item C<cron> I<cron spec>
 
 A cron spec makes it possible to regulary execute a sync. To execute a sync
 every minute, regardless of any changes try: */1 * * * * as a cron spec.
+
+=item C<noop_file> I<filename>
+
+If this option is present, the syncer can be put to sleep by deleting or
+creating I<filename>. As long as the file is present, the syncer will operate
+normally. If the file is deleted, the syncer will stop watching and syncing.
+If the file is created again, this will be detected by a cron event and the
+syncer will resume. So you should always use the cron option also, if you
+choose to use the noop_file option.
+
+=item C<admin_to> I<email address>
+
+In addition to error logging, it is possible to have anysyncd report grave
+errors by email. This feature is enabled by configuring both admin_to and
+admin_from options.
+
+=item C<admin_from> I<email address>
+
+In addition to error logging, it is possible to have anysyncd report grave
+errors by email. This feature is enabled by configuring both admin_to and
+admin_from options.
+
+=item C<waiting_time> I<integer>
+
+This defines the length of the grace period a syncer will wait for more file
+events after the first event, before it will execute the sync action.
 
 =back
 
@@ -96,7 +125,7 @@ This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 
-Alexander Wirt <alexander.wirt@credativ.de>
+Alexander Wirt <alexander.wirt@credativ.de>,
+Carsten Wolff <carsten.wolff@credativ.de>
 
 =cut
-

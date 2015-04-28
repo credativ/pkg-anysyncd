@@ -1,0 +1,138 @@
+#!/usr/bin/perl
+=head1 NAME
+
+anysyncd-csync2-remote-helper - Helper tool for the anysyncd csync2 syncer
+
+=head1 DESCRIPTION
+
+This helper executes the commands on the target system that are needed for the
+two-stage commit implemented by the anysyncd csync2 syncer.
+
+=head1 SYNOPSIS
+
+    anysyncd-csync2-remote-helper [action] [syncer]
+
+=head2 Configuration File
+
+anysyncd-csync2-remote-helper uses the same configuration file as anysyncd. See
+the anysyncd documentation for details.
+
+=head2 Commandline Parameters
+
+anysyncd-csync2-remote-helper takes exactly two mandatory paramters.
+
+=over
+
+=item C<action>
+
+The action to take by anysyncd-csync2-remote-helper. This is either C<stamps>
+(return the local lastchange and success timetamps) or C<commit> (commit the
+changes from csync_dir to prod_dir).
+
+=item C<syncer>
+
+This is the name of the anysyncd syncer (csync2 sync group) to act on.
+
+=back
+
+=cut
+
+use strict;
+use warnings;
+
+use File::Basename qw(basename dirname);
+use File::Spec;
+use File::Copy;
+use Getopt::Long;
+use Config::IniFiles;
+use Anysyncd::Action::CSync2::Utils;
+
+my $cfgfile = "/etc/anysyncd/anysyncd.ini";
+my $verbose = 0;
+
+GetOptions(
+    "cfg"     => \$cfgfile,
+    "verbose" => \$verbose,
+);
+
+my $action = shift;
+my $syncer = shift;
+
+if ( !$action ) {
+    die "action argument is required";
+}
+if ( !$syncer ) {
+    die "syncer argument is required";
+}
+
+my $cfg = Config::IniFiles->new( -file => '/etc/anysyncd/anysyncd.ini' );
+if ( !$cfg->SectionExists($syncer) ) {
+    die "no sync cfg named '$syncer' defined in /etc/anysyncd/anysyncd.ini";
+}
+
+my $handler_cfg;
+foreach my $k ( $cfg->Parameters($syncer) ) {
+    $handler_cfg->{$k} = $cfg->val( $syncer, $k );
+}
+
+my $utils = Anysyncd::Action::CSync2::Utils->new( { name => $syncer } );
+
+my $proddir = $handler_cfg->{prod_dir};
+$proddir =~ s/\/*$//;
+my ( $basedir, $name ) = ( dirname($proddir), basename($proddir) );
+my $proddir_tmp = File::Spec->join( $basedir, ".$name.tmp" );
+my $csyncdir = $handler_cfg->{'csync_dir'};
+$csyncdir =~ s/\/*$//;
+
+my $err    = 0;
+my $errstr = "";
+if ( $action eq 'commit' ) {
+    ( $err, $errstr ) = $utils->rsync( $csyncdir, $proddir_tmp );
+    if ( !$err and -d $proddir ) {
+        $err = !move( $proddir, "$proddir.bak" );
+        $errstr = $! if $err;
+    }
+    if ( !$err ) {
+        $err = !move( $proddir_tmp, $proddir );
+        $errstr = $! if $err;
+    }
+    if ( !$err and -d "$proddir.bak" ) {
+        $err = !move( "$proddir.bak", $proddir_tmp );
+        $errstr = $! if $err;
+    }
+} elsif ( $action eq 'stamps' ) {
+    my @stamps = ();
+    foreach my $type ( "success", "lastchange" ) {
+        my $stamp = "";
+        my $fn    = "/var/lib/anysyncd/" . $name . "_" . $type . "_stamp";
+        if ( -f $fn ) {
+            if ( open( my $fh, "<", $fn ) ) {
+                $stamp = do { local $/ = <$fh> };
+                close $fh;
+            } else {
+                $err++;
+                $errstr .= "Failed to open $fn: $!";
+            }
+        }
+        push( @stamps, $stamp );
+    }
+    print join( ":", @stamps );
+} else {
+    die "unknown action '$action'";
+}
+
+print STDERR $errstr if ( $err and $errstr );
+exit $err;
+
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Patrick Schoenfeld <patrick.schoenfeld@credativ.de>,
+Carsten Wolff <carsten.wolff@credativ.de>
+
+=cut
+
+# vim: syntax=perl sw=4 ts=4 et shiftround
