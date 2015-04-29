@@ -1,5 +1,101 @@
 package Anysyncd::Action::CSync2;
 
+=head1 NAME
+
+Anysyncd::Action::CSync2 - csync2 based syncer for anysyncd
+
+=head1 SYNOPSIS
+
+    [syncpair]
+
+    handler = Anysyncd::Action::CSync2
+    prod_dir = /tmp/testdir
+    csync_dir = /tmp/testdir2
+    watcher = /tmp/testdir
+    remote_hosts = host1 host2
+
+=head1 DESCRIPTION
+
+Anysyncd::Action::CSync2 is a syncer for anysyncd that uses csync2. It aims at
+being more robust by using csync2's ability to detect conflicts as well as other
+measures to ensure that only consistent states of the whole directory are used
+on any side.
+
+=head2 Configuration File
+
+For a general description of the configuration file, look at the anysynd
+documentation.
+
+=head3 CSync2 syncer options
+
+=over
+
+=item C<prod_dir> I<path>
+
+This is the source path for the whole process. This should be the path your
+applications use to store their files.
+
+=item C<csync_dir> I<path>
+
+This is the path for an intermediate copy of prod_dir used by csync2 for the
+sync to other nodes. This path must be included in the corresponding csync2
+sync group.
+
+=item C<remote_hosts> I<host1 host2 host3>
+
+This list (seperated by whitespace) should include all other hosts in the
+csync2 cluster. This module requires SSH access to all of them. Either for the
+root user or a normal user that has sufficient rights, maybe granted by
+remote_prefix_command.
+
+=item C<remote_prefix_command> I<cmd>
+
+This allows to prefix all remote commands with I<cmd>. This can be used to
+employ sudo for example.
+
+=item C<retry_interval> I<seconds>
+
+This option defines the distance in time between two tries to sync a consistent
+directory state with no intermittent changes. Depending on typical workload on
+your prod_dir, this might be tuned to avoid many retries.
+
+=back
+
+=head2 csync2 Configuration File
+
+This module needs a working csync2 configuration that satisfies two conditions:
+
+=over
+
+=item *
+
+For each Anysyncd::Action::CSync2 syncer there is a csync2 sync group with an
+identical name
+
+=item *
+
+Each of these sync groups include the csync_dir from their corresponding
+Anysyncd::Action::CSync2 syncer.
+
+=back
+
+=head3 Example csync2 sync group
+
+This example of a csync2 sync group configuration would match the anysyncd
+configuration from the synopsis above.
+
+    group syncpair
+    {
+        host host1;
+        host host2;
+
+        key /etc/csync2.key;
+        include "/tmp/testdir2";
+        auto none;
+    }
+
+=cut
+
 use Moose;
 use Net::OpenSSH;
 use AnyEvent::Util;
@@ -244,7 +340,8 @@ This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 
-Carsten Wolff <carsten.wolff@credativ.de>
+Carsten Wolff <carsten.wolff@credativ.de>,
+Patrick Schoenfeld <patrick.schoenfeld@credativ.de>
 
 =cut
 

@@ -1,5 +1,16 @@
 package Anysyncd::Action::CSync2::Utils;
 
+=head1 Anysyncd::Action::CSync2::Utils - Utility functions
+
+These utility functions are shared by Anysyncd::Action::CSync2 and
+anysyncd-csync2-remote-helper
+
+=head2 Methods
+
+=over 12
+
+=cut
+
 use Moose;
 
 use File::Rsync;
@@ -7,6 +18,14 @@ use File::DirCompare;
 use String::ShellQuote;
 
 has 'name' => ( is => 'rw' );
+
+=item C<rsync>
+
+A wrapper around File::Rsync, that handles parameters, options and errors.
+Most importantly, it checks if src and dest are really equal after the rsync
+run and returns an error condition otherwise.
+
+=cut
 
 sub rsync {
     my ( $self, $proddir, $csyncdir ) = @_;
@@ -63,6 +82,8 @@ sub _dirs_equal {
 }
 
 1;
+
+=back
 
 =head1 LICENSE
 

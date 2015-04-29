@@ -1,6 +1,41 @@
 #!/usr/bin/perl
-# Helper tool for the anysyncd csync2 syncer which executes the remote commands
-# needed for the two-stage commit
+=head1 NAME
+
+anysyncd-csync2-remote-helper - Helper tool for the anysyncd csync2 syncer
+
+=head1 DESCRIPTION
+
+This helper executes the commands on the target system that are needed for the
+two-stage commit implemented by the anysyncd csync2 syncer.
+
+=head1 SYNOPSIS
+
+    anysyncd-csync2-remote-helper [action] [syncer]
+
+=head2 Configuration File
+
+anysyncd-csync2-remote-helper uses the same configuration file as anysyncd. See
+the anysyncd documentation for details.
+
+=head2 Commandline Parameters
+
+anysyncd-csync2-remote-helper takes exactly two mandatory paramters.
+
+=over
+
+=item C<action>
+
+The action to take by anysyncd-csync2-remote-helper. This is either C<stamps>
+(return the local lastchange and success timetamps) or C<commit> (commit the
+changes from csync_dir to prod_dir).
+
+=item C<syncer>
+
+This is the name of the anysyncd syncer (csync2 sync group) to act on.
+
+=back
+
+=cut
 
 use strict;
 use warnings;
@@ -88,5 +123,16 @@ if ( $action eq 'commit' ) {
 
 print STDERR $errstr if ( $err and $errstr );
 exit $err;
+
+=head1 LICENSE
+
+This is released under the MIT License. See the B<COPYRIGHT> file.
+
+=head1 AUTHOR
+
+Patrick Schoenfeld <patrick.schoenfeld@credativ.de>,
+Carsten Wolff <carsten.wolff@credativ.de>
+
+=cut
 
 # vim: syntax=perl sw=4 ts=4 et shiftround

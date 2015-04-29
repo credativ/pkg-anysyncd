@@ -43,7 +43,7 @@ Getopt Interface:
 
 =head2 Configuration File
 
-None yet
+See the configfile and config methods below.
 
 =head2 Methods
 
@@ -65,7 +65,7 @@ use Config::IniFiles;
 use Data::Dumper;
 use Carp qw(croak);
 
-my $VERSION = '1.7';
+my $VERSION = '1.9';
 
 =item C<log>
 
@@ -135,13 +135,13 @@ has config => (
     documentation => qq { the 'Config::IniFiles' configobject }
 );
 
-#hide some stuff from the commandline
+# hide some stuff from the commandline
 has '+pidbase'        => ( traits => ['NoGetopt'] );
 has '+no_double_fork' => ( traits => ['NoGetopt'] );
 has '+ignore_zombies' => ( traits => ['NoGetopt'] );
 has '+progname'       => ( traits => ['NoGetopt'] );
 
-#has '+dont_close_all_files' => ( traits => ['NoGetopt'] );
+# has '+dont_close_all_files' => ( traits => ['NoGetopt'] );
 has '+basedir' => ( traits => ['NoGetopt'] );
 
 sub _build_loglevel {
@@ -195,8 +195,17 @@ sub BUILD {
     }
 }
 
-# Handle SIGHUP ourselves, the MooseX::Daemonize manpage lies about having a
-# handler "handle_sighup". It's commented in the code.
+=item C<setup_signals>
+
+Complements the MooseX::Daemonize method by adding a handler for SIGHUP,
+because the MooseX::Daemonize manpage lies about having a handler
+"handle_sighup". It is commented in the code.
+
+Re-opens the logfile on SIGHUP in daemon mode. In foreground mode, shut down
+instead.
+
+=cut
+
 after setup_signals => sub {
     my $self = shift;
     $SIG{'HUP'} = sub {
@@ -210,12 +219,24 @@ after setup_signals => sub {
     };
 };
 
+=item C<shutdown>
+
+Log shoutdown.
+
+=cut
+
 before shutdown => sub {
     my $self = shift;
     Log::Log4perl->init( $self->_logging_configuration );
     $self->log( Log::Log4perl->get_logger() );
     $self->log->info('Daemon shutting down');
 };
+
+=item C<stop>
+
+Log stop.
+
+=cut
 
 before stop => sub {
     my $self = shift;
@@ -224,12 +245,25 @@ before stop => sub {
     $self->log->info('Daemon shutting down');
 };
 
+=item C<restart>
+
+Log restart.
+
+=cut
+
 after restart => sub {
     my $self = shift;
     Log::Log4perl->init( $self->_logging_configuration );
     $self->log( Log::Log4perl->get_logger() );
     $self->log->info('Daemon restarted');
 };
+
+=item C<start>
+
+Starts the daemon functionality. Init Logging, read config, instantiate handler
+objects, start AnyEvent Loop.
+
+=cut
 
 after start => sub {
     my $self = shift;
@@ -279,6 +313,7 @@ after start => sub {
     $w->recv;                   # enters "main loop" till $condvar gets ->send
 };
 
+# Loads handler packages
 sub _load {
     my ( $self, $config ) = @_;
 
@@ -311,7 +346,8 @@ This is released under the MIT License. See the B<COPYRIGHT> file.
 
 =head1 AUTHOR
 
-Alexander Wirt <alexander.wirt@credativ.de>
+Alexander Wirt <alexander.wirt@credativ.de>,
+Carsten Wolff <carsten.wolff@credativ.de>
 
 =cut
 
