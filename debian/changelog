@@ -1,3 +1,13 @@
+anysyncd (1.9-1) unstable; urgency=medium
+
+  [ Patrick Schoenfeld ]
+  * Add missing force-reload target
+
+  [ Carsten Wolff ]
+  * Imported Upstream version 1.9
+
+ -- Carsten Wolff <carsten.wolff@credativ.de>  Wed, 29 Apr 2015 09:07:33 +0200
+
 anysyncd (1.8-1) unstable; urgency=medium
 
   [ Carsten Wolff ]
