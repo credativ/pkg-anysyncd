@@ -69,6 +69,8 @@ has '_is_locked' => (
 has _files => ( is => 'rw' );
 has _stamps => ( is => 'rw', isa => 'HashRef', default => sub { {} } );
 
+my $statedir = '/var/lib/anysyncd';
+
 sub BUILD {
     my $self = shift;
 
@@ -193,6 +195,15 @@ sub _report_error {
     # log
     $self->log->error($errstr);
 
+    # errorfile
+    my $errorfile = $statedir . '/' . $self->config->{name} . '_hasSyncError';
+    if ( open my $fh, ">> $errorfile" ) {
+        print $fh $errstr;
+        close $fh;
+    } else {
+        $self->log->error("Cannot write error file $errorfile!\n");
+    }
+
     # e-mail
     return
         unless ( $self->config->{'admin_from'}
@@ -222,22 +233,31 @@ sub _report_error {
 
 sub _stamp_file {
     my ( $self, $type, $stamp ) = @_;
-    my $ret = $self->_stamps->{$type};
-    my $fn =
-        "/var/lib/anysyncd/" . $self->config->{name} . "_" . $type . "_stamp";
+    my $ret        = $self->_stamps->{$type};
+    my $nameprefix = $statedir . '/' . $self->config->{name};
+    my $fn         = $nameprefix . "_" . $type . "_stamp";
     if ($stamp) {
-        open( my $fh, ">", $fn )
-            or $self->_report_error("Failed to open $fn: $!");
-        print $fh $stamp;
-        close $fh;
+        my $fh;
+        unless ( open( $fh, ">", $fn ) ) {
+            $self->_report_error("Failed to open $fn: $!");
+        } else {
+            print $fh $stamp;
+            close $fh;
+            my $errorfile = $nameprefix . '_hasSyncError';
+            $self->_report_error("Cannot unlink $errorfile: $!")
+                if ( -f $errorfile && !unlink($errorfile) );
+        }
         $ret = $stamp;
     } elsif ( !$ret and -e $fn ) {
 
         # read from disk if there's no mem state, yet
-        open( my $fh, "<", $fn )
-            or $self->_report_error("Failed to open $fn: $!");
-        $ret = do { local $/ = <$fh> };
-        close $fh;
+        my $fh;
+        unless ( open( $fh, "<", $fn ) ) {
+            $self->_report_error("Failed to open $fn: $!");
+        } else {
+            $ret = do { local $/ = <$fh> };
+            close $fh;
+        }
     }
     $self->_stamps->{$type} = $ret;
     return $ret;

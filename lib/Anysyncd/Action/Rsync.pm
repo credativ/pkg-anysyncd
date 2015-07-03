@@ -79,6 +79,7 @@ sub process_files {
 
     # we try at least 3 times to empty the files list
     fork_call {
+        my $errstr;
         foreach my $i ( 1 .. 3 ) {
             $self->log->debug("Rsync run $i");
             next unless $self->files;
@@ -88,31 +89,36 @@ sub process_files {
                 last;
             }
 
+            # we will give it another try, so clear error
+            $errstr = "";
+
             # clear list of files
             $self->files_clear;
 
+            $self->log->debug( "Syncing from: "
+                    . $self->config->{'from'} . " - "
+                    . $self->config->{'to'} );
             $rsync->exec(
                 {   src  => $self->config->{'from'},
                     dest => $self->config->{'to'}
                 }
-            ) or $self->log->error("Failed");
-            $self->log->debug( "Syncing from: "
-                    . $self->config->{'from'} . " - "
-                    . $self->config->{'to'} );
+            );
             if ( scalar( $rsync->err ) ) {
-                $self->log->debug(
-                    sprintf(
-                        'Rsync from "%s" to "%s" failed: ',
-                        $self->config->{'from'}, $self->config->{'to'},
-                        join( "\n", $rsync->err )
-                    )
+                $errstr = sprintf(
+                    'Rsync from "%s" to "%s" failed: ',
+                    $self->config->{'from'},
+                    $self->config->{'to'},
+                    join( "\n", $rsync->err )
                 );
+                $self->log->debug($errstr);
             }
         }
+        croak($errstr) if $errstr;
     }
     sub {
         if ($@) {
             $self->_unlock();
+            $self->_report_error($@);
             croak("There was an error in the fork call: $@");
         }
         $self->log->info("rsync calls done");
