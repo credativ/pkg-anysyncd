@@ -1,3 +1,9 @@
+anysyncd (1.10-1) unstable; urgency=medium
+
+  * Import upstream version 1.10
+
+ -- Damian Lukowski <damian.lukowski@credativ.de>  Fri, 03 Jul 2015 13:26:26 +0200
+
 anysyncd (1.9-1) unstable; urgency=medium
 
   [ Patrick Schoenfeld ]
