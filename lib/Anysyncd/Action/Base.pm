@@ -245,7 +245,9 @@ sub _stamp_file {
             close $fh;
             my $errorfile = $nameprefix . '_hasSyncError';
             $self->_report_error("Cannot unlink $errorfile: $!")
-                if ( -f $errorfile && !unlink($errorfile) );
+                if ($type eq "success"
+                and -f $errorfile
+                and not unlink($errorfile) );
         }
         $ret = $stamp;
     } elsif ( !$ret and -e $fn ) {
