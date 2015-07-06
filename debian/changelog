@@ -1,3 +1,9 @@
+anysyncd (1.10.1-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.10.1
+
+ -- Carsten Wolff <carsten.wolff@credativ.de>  Mon, 06 Jul 2015 14:32:08 +0200
+
 anysyncd (1.10-1) unstable; urgency=medium
 
   * Import upstream version 1.10
