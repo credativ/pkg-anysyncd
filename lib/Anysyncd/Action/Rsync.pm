@@ -61,11 +61,12 @@ sub BUILD {
 }
 
 sub process_files {
-    my $self = shift;
+    my ( $self, $full_sync ) = @_;
     $self->_lock();
-    $self->log->debug("Processing files");
+    $self->log->debug(
+        "Processing files" . ( $full_sync ? " ($full_sync)" : "" ) );
 
-    if ( !scalar @{ $self->files() } ) {
+    if ( !$full_sync and !scalar @{ $self->files() } ) {
         $self->log->debug("No files to sync");
         $self->_unlock();
         return;
@@ -82,9 +83,9 @@ sub process_files {
         my $errstr;
         foreach my $i ( 1 .. 3 ) {
             $self->log->debug("Rsync run $i");
-            next unless $self->files;
+            next if ( !$full_sync and !$self->files );
             $self->log->debug( "files: " . scalar( @{ $self->files } ) );
-            if ( !scalar( @{ $self->files } ) ) {
+            if ( !$full_sync and !scalar( @{ $self->files } ) ) {
                 $self->log->debug("No files left");
                 last;
             }
@@ -112,6 +113,7 @@ sub process_files {
                 );
                 $self->log->debug($errstr);
             }
+            last if ( !$errstr and $full_sync );
         }
         croak($errstr) if $errstr;
     }

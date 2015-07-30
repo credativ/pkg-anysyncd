@@ -34,7 +34,7 @@ The logfile for the AnySyncd Daemon. Defaults to /var/log/anysyncd.log.
 
 =item C<loglevel> I<loglevel>
 
-log4perl compatible loglevel, defaults to debug.
+log4perl compatible loglevel, set to DEBUG for debugging. Defaults to INFO.
 
 =back
 
