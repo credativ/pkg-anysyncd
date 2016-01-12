@@ -65,7 +65,7 @@ use Config::IniFiles;
 use Data::Dumper;
 use Carp qw(croak);
 
-my $VERSION = '1.11';
+my $VERSION = '1.12';
 
 =item C<log>
 
@@ -191,7 +191,7 @@ sub BUILD {
 
     my $statedir = "/var/lib/anysyncd";
     if ( !-d $statedir ) {
-        mkdir( $statedir, 0700 ) or croak("Failed to create $statedir: $!");
+        mkdir( $statedir, 0755 ) or croak("Failed to create $statedir: $!");
     }
 }
 
@@ -221,7 +221,7 @@ after setup_signals => sub {
 
 =item C<shutdown>
 
-Log shoutdown.
+Log shutdown.
 
 =cut
 
@@ -270,6 +270,10 @@ after start => sub {
 
     return unless $self->is_daemon;
     $0 = 'anysyncd (manager process)';
+
+    # MooseX daemonize sets umask(0)
+    # set umask to 0022 in order to write protect state files
+    umask 022;
 
     Log::Log4perl->init( $self->_logging_configuration );
 

@@ -22,7 +22,7 @@ section driven ini file. Each directory to be watched and synced (a syncer) has
 it's own ini section. The I<global> section contains configuration options
 global to the whole framework. Also, all options from the I<global> section
 are passed down to the syncer configuration, i.e. syncers can share common
-options via the glocbal section.
+options via the global section.
 
 =head3 Global options
 
