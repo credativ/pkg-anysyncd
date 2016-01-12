@@ -1,3 +1,14 @@
+anysyncd (1.12-1) unstable; urgency=medium
+
+  [ Patrick Schoenfeld ]
+  * Make /var/lib/anysyncd world-readable
+
+  [ Arnd Hannemann ]
+  * Create state directory /var/lib/anysyncd during package installation
+  * Imported Upstream version 1.12
+
+ -- Arnd Hannemann <arnd.hannemann@credativ.de>  Tue, 12 Jan 2016 14:12:54 +0100
+
 anysyncd (1.11-1) unstable; urgency=medium
 
   * Imported Upstream version 1.11
