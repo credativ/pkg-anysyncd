@@ -2,7 +2,7 @@
 
 override_dh_fixperms:
 	dh_fixperms
-	chmod o+rx debian/var/lib/anysyncd
+	chmod o+rx debian/anysyncd/var/lib/anysyncd
 
 %:
 	dh $@
