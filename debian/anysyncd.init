@@ -25,6 +25,9 @@ SCRIPTNAME=/etc/init.d/$NAME
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
+# Exit if their isn't a configfile
+[ -f /etc/anysyncd/anysyncd.ini ] || exit 0
+
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
 
